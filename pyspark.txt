@@ -1,0 +1,84 @@
+students_json = ['{"id":100, "name":"Alice", "grade":8.5,"degree":"Computer Science"}',
+'{"id":101, "name":"Bob", "grade":7.1,"degree":"Engineering"}']
+
+with open("students.json", "w") as f:
+    f.write("\n".join(students_json))
+
+useful_perc_data = yelp_df.select((yelp_df.id).alias("uid"),(yelp_df.useful/28*100).cast("int"))
+
+head /usr/lib/hue/apps/search/examples/collections/solr_configs_log_analytics_demo/index_data.csv
+
+logs_df = sqlCtx.load(
+source="com.databricks.spark.csv",
+header = 'true',
+inferSchema = 'true',
+path =
+'file:///usr/lib/hue/apps/search/examples/collections/solr_configs_log_analytics_demo/index_data.csv')
+logs_df.count()
+
+sc._jsc.hadoopConfiguration().set('textinputformat.record.delimiter','\r\n')
+
+logs_df.count()
+logs_df.printSchema()
+
+logs_df.groupBy("code").count().show()
+
+from pyspark.sql.functions import asc, desc
+logs_df.groupBy("code").count().orderBy(desc("count")).show()
+
+
+logs_df.groupBy("code").avg("bytes").show()
+
+import pyspark.sql.functions as F
+
+logs_df.groupBy("code").agg(
+logs_df.code,
+F.avg(logs_df.bytes),
+F.min(logs_df.bytes),
+F.max(logs_df.bytes)
+).show()
+
+
+yelp_df = sqlCtx.load(
+source="com.databricks.spark.csv",
+header = 'true',
+inferSchema = 'true',
+path = 'file:///home/cloudera/Spark/yelp_index.csv'
+
+yelp_df.agg({"cool": "mean"}).collect()
+yelp_df.filter("review_count >= 10")
+yelp_df.filter("review_count >= 10").groupBy("stars").agg(yelp_df.stars, F.avg(yelp_df.cool).alias("mn")).show()
+
+yelp_df.filter("review_count >= 10").filter("open = TRUE").groupBy("stars").agg(yelp_df.stars, F.avg(yelp_df.cool).alias("mn")).show()
+yelp_df.filter("review_count >= 10 AND open = TRUE").groupBy("stars").agg(yelp_df.stars, F.avg(yelp_df.cool).alias("mn")).show()
+
+from pyspark.sql.functions import asc, desc
+yelp_df.filter("review_count >= 10 AND open = TRUE").groupBy("state").count().orderBy(desc("count")).show()
+
+ yelp_df.groupBy("business_id").count().agg(F.max("count")).show()
+
+filtered_yelp = sqlCtx.sql("SELECT * FROM yelp WHERE useful >= 1")
+sqlCtx.sql("SELECT MAX(useful) AS max_useful FROM yelp").collect()
+
+useful_perc_data = yelp_df.select((yelp_df.id).alias("uid"),(yelp_df.useful/28*100).cast("int").alias("useful_perc"))
+useful_perc_data.registerTempTable("useful_perc_data")
+sqlCtx.sql("""SELECT useful_perc_data.uid, useful_perc, review_count FROM useful_perc_data INNER JOIN yelp ON useful_perc_data.uid=yelp.id""")
+
+customers_df = sqlCtx.sql("SELECT * FROM customers")
+customers_df.show()
+
+orders_df = sqlCtx.sql("SELECT * FROM orders")
+orders_df.filter("order_status = 'SUSPECTED_FRAUD'").count()
+
+oi_df = sqlCtx.sql("SELECT * FROM order_items")
+oi_df.groupBy("order_item_order_id").agg((oi_df.order_item_order_id).alias("oid"), F.avg(oi_df.order_item_subtotal).alias("sub")).orderBy(desc("sub")).limit(5).collect()
+oi_df.registerTempTable("oi")
+sqlCtx.sql("""SELECT MAX(s) FROM (SELECT SUM(order_item_subtotal) AS s FROM oi GROUP BY order_item_order_id) AS tab""")
+
+orders_df = sqlCtx.sql("SELECT * FROM orders")
+orders_df.registerTempTable("o")
+oj = sqlCtx.sql("""SELECT * FROM o INNER JOIN oi ON o.order_id = oi.order_item_order_id""")
+oj.registerTempTable("oj")
+sqlCtx.sql("""SELECT AVG(order_item_product_price) FROM oj WHERE order_status = 'COMPLETE'""").collect()
+sqlCtx.sql("""SELECT MAX(s) FROM (SELECT SUM(order_item_subtotal) AS s FROM oj WHERE order_status = 'COMPLETE' GROUP BY order_customer_id) AS tab""").collect()
+sqlCtx.sql("""SELECT MAX(s) FROM (SELECT SUM(order_item_subtotal) AS s FROM oj WHERE order_status <> 'COMPLETE' GROUP BY order_item_order_id) AS tab""")

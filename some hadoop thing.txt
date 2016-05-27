@@ -1,0 +1,9 @@
+CREATE TABLE userinfo ( uname STRING, pswd STRING, uid INT, gid
+INT, fullname STRING, hdir STRING, shell STRING ) ROW FORMAT
+DELIMITED FIELDS TERMINATED BY ':' STORED AS TEXTFILE; 
+
+curl -i "http://quickstart.cloudera:14000/webhdfs/v1/user/cloudera?user.name=cloudera&op=GETFILESTATUS"
+
+curl -i -X PUT "http://quickstart.cloudera:14000/webhdfs/v1/user/test?user.name=cloudera&op=MKDIRS&permssion=755"
+
+http://research.microsoft.com/en-us/um/redmond/groups/srg/papers/2001-joshuago-tr72.pdf
