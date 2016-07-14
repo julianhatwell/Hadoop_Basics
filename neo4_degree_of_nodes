@@ -1,0 +1,2 @@
+match (n:MyNode)-[r]-()
+return n.Name, count(distinct r) as degree order by degree

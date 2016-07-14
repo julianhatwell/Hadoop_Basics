@@ -1,0 +1,49 @@
+1. 
+match (n:TrialGene) return count(n)
+
+9656
+
+2.
+match (n:TrialGene)-[r]->() return count(r)
+
+46621
+
+3.
+match (n)-[r]->(n) return r
+
+1078
+
+4.
+match (n)-[r]->(m) where m <> n return distinct n, m, count(r)
+
+300 nodes, 937 edges
+
+6.
+match (n)-[r]->(m) where m <> n return distinct n, m, count(r) as myCount order by myCount desc limit 1
+
+2 genes with 16 associations between them being th highest number
+
+7.
+match p=(n {Name:'BRCA1'})-[:AssociationType*..2]->(m) return p
+
+300 nodes 1998 edges and 559 additional
+
+
+8.
+MATCH p =allShortestPaths((source)-[r:AssociationType*]-(destination))
+WHERE source.Name='BRCA1' AND destination.Name = 'NBR1'
+RETURN EXTRACT(n IN NODES(p)| n.Name) AS Paths;
+
+SNCA BRCA1
+
+9 non-directed paths
+
+8.
+match (n:TrialGene)-[r]->() return n.Name as Node, count(r) as Outdegree order by Outdegree desc union match (a:TrialGene)-[r]->(leaf) where not((leaf)-->()) return leaf.Name as Node, 0 as Outdegree
+
+
+
+9.
+match (n:MyNode)-[r]-() with n as nodes, count(distinct r) as degree return degree, count(nodes) order by degree asc
+
+821

@@ -1,0 +1,4 @@
+LOAD CSV WITH HEADERS FROM "file:///gene_gene_associations_50k.csv" AS row
+MERGE (a:TrialGene {Name:row.OFFICIAL_SYMBOL_A})
+MERGE (b:TrialGene {Name:row.OFFICIAL_SYMBOL_B})
+MERGE(a)-[:AssociationType {AssociatedWith: row.EXPERIMENTAL_SYSTEM}]->(b);

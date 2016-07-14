@@ -1,0 +1,4 @@
+LOAD CSV WITH HEADERS FROM "file:///gene_gene_associations_10k.csv" AS row
+MERGE (a:offa {Name:row.OFFICIAL_SYMBOL_A})
+MERGE (b:offb {Name:row.OFFICIAL_SYMBOL_B})
+MERGE(a)<-[:EXPERIMENTAL_SYSTEM]-(b);

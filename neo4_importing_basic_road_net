@@ -1,0 +1,4 @@
+LOAD CSV WITH HEADERS FROM "file:///test.csv" AS line 
+MERGE (n:MyNode {Name:line.Source})
+MERGE (m:MyNode {Name:line.Target})
+MERGE (n) -[:TO {dist:line.distance}]-> (m)

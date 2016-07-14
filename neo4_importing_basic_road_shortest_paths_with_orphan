@@ -1,0 +1,4 @@
+match (d {Name:'D'})-[:TO]-(b) with collect(distinct b.Name) as neighbors match (n)-[r:TO]->(m)
+where not (n.Name in (neighbors+'D')) and not (m.Name in (neighbors+'D'))
+match (d {Name:'D'})-[:TO]-(b)-[:TO]->(leaf) where not((leaf)-->())
+return (leaf), n, r, m;

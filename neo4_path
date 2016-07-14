@@ -1,0 +1,3 @@
+match p=(a)-[:TO*]-(c) where a.Name='H' and c.Name='P' return p order by length(p) asc limit 1
+
+match p=(a)-[:TO*]-(c) where a.Name='H' and c.Name='P' return length(p) order by length(p) asc limit 1

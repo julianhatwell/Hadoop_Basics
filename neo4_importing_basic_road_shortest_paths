@@ -1,0 +1,8 @@
+MATCH p =allShortestPaths((source)-[r:TO*]->(destination))
+WHERE source.Name='A' AND destination.Name = 'P'
+RETURN EXTRACT(n IN NODES(p)| n.Name) AS Paths;
+
+MATCH p =allShortestPaths((source)-[r:TO*]->(destination))
+WHERE source.Name='A' AND destination.Name = 'P'
+AND LENGTH(NODES(p)) > 5
+RETURN EXTRACT(n IN NODES(p)| n.Name) AS Paths,length(p);

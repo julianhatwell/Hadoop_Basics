@@ -1,0 +1,1 @@
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar -input /user/cloudera/bd/flam/buy-clicks.csv -output /user/cloudera/bd/flam_output -mapper /home/cloudera/bd/bd_tot_buys_mapper.py -reducer /home/cloudera/bd/bd_tot_buys_reducer.py
