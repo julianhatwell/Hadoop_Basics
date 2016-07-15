@@ -71,26 +71,25 @@ TotalTimeSpent <- setkey(data.table(userId = as.numeric(dimnames(totalTimeSpent)
 
 lattice::densityplot(totalTimeSpent)
 
+team <- setkey(data.table(team.csv), teamId)
+names(`team-assignments.csv`) <- c("timestamp", "teamId", "userId", "assignmentId")
+user.team <- setkey(data.table(`team-assignments.csv`), teamId)
+user.team.stats <- setkey(team[J(user.team)][!(is.na(strength)), .(numTeams = .N, aveStrength = mean(strength)), by = userId], userId)
+
+lattice::densityplot(user.team.stats$aveStrength)
+
 naToZero <- function(x) {if (is.na(x)) 0 else x }
-(comb <- TotalMoneySpent[J(TotalTimeSpent)][J(HitRatio)][, `:=`(
+
+(comb <- TotalMoneySpent[J(TotalTimeSpent)][J(HitRatio)][J(user.team.stats)][, `:=`(
   totalMoneySpent = sapply(totalMoneySpent, naToZero)
-  , totalTimeSpent = sapply(totalTimeSpent, naToZero))])
+  , totalTimeSpent = sapply(totalTimeSpent, naToZero))][!(is.na(hitRatio)) & totalTimeSpent > 0.00,])
 
-write.csv(HitRatio
-          , file=paste0(fileloc, "hitRatio.csv")
-          , row.names = FALSE)
-
-write.csv(TotalMoneySpent
-          , file=paste0(fileloc, "totalMoneySpent.csv")
-          , row.names = FALSE)
-
-write.csv(TotalTimeSpent
-          , file=paste0(fileloc, "totalTimeSpent.csv")
-          , row.names = FALSE)
-
-write.csv(comb[totalTimeSpent > 0.00, ]
+write.csv(comb
           , file = paste0(fileloc, "HitsTimeMoney.csv")
           , row.names = FALSE)
+
+
+
 
 nonSessionClicks <- `game-clicks.csv`[`game-clicks.csv`$userId %in% as.numeric(comb[totalTimeSpent == 0.00, userId]),]
 sessionsToCheck <- unique(nonSessionClicks$userSessionId)
