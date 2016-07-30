@@ -33,9 +33,9 @@ for (i in seq_along(listing)) {
 length(unique(`buy-clicks.csv`$buyId))
 sum(`buy-clicks.csv`$price)
 
-lattice::barchart(tapply(`buy-clicks.csv`$buyId, `buy-clicks.csv`$buyId, length), horizontal = FALSE, ylab = "Number of items purchased", xlab = "buyId (item Id)")
+lattice::barchart(tapply(`buy-clicks.csv`$buyId, `buy-clicks.csv`$buyId, length), horizontal = FALSE, ylab = "Number of items purchased", xlab = "buyId (item Id)", col = "violetred")
 
-lattice::barchart(tapply(`buy-clicks.csv`$price, `buy-clicks.csv`$buyId, sum), horizontal = FALSE, ylab = "Total Revenue", xlab = "buyId (item Id)")
+lattice::barchart(tapply(`buy-clicks.csv`$price, `buy-clicks.csv`$buyId, sum), horizontal = FALSE, ylab = "Total Revenue", xlab = "buyId (item Id)", col = "violetred")
 
 lattice::barchart(head(sort(tapply(`buy-clicks.csv`$price, `buy-clicks.csv`$userId, sum), decreasing = TRUE), 10), horizontal = FALSE, xlab = "userId", ylab = "Total Revenue")
 
@@ -88,6 +88,31 @@ write.csv(comb
           , file = paste0(fileloc, "HitsTimeMoney.csv")
           , row.names = FALSE)
 
+# radial graphs of clusters
+clusts <- read.csv(paste0(fileloc, "TeamUserStats.csv"))
+scaledClusts <- as.data.frame(lapply(clusts[,3:6], scale))
+
+lattice::parallelplot(scaledClusts[,2:5]
+                      , key = simpleKey(
+                          text = as.character(clusts[,2])
+                          , points = FALSE
+                          , lines = TRUE
+                          , cex = 0.7
+                          , columns = 3)
+                      , aspect = 0.175
+                      , horizontal.axis = FALSE)
+
+# adding chat data
+chattyUsers <- setkey(data.table(read.csv(paste0(fileloc, "chattyUsers.csv"))), userId)
+(comb <- chattyUsers[J(comb)][, numChatItems := sapply(numChatItems, naToZero)])
+
+xyplot(aveStrength~numChatItems, data = comb)
+
+chattyTeams <- setkey(data.table(read.csv(paste0(fileloc, "chattyTeams.csv"))), teamId)
+teams <- setkey(data.table(team.csv), teamId)
+(teams <- chattyTeams[J(teams)][, numChatItems := sapply(numChatItems, naToZero)])
+
+xyplot(strength~numChatItems, data = teams)
 
 
 
